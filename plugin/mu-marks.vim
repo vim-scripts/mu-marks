@@ -4,7 +4,7 @@
 "
 " MicroMarks {{{ (description)
 " Author:	Gergely Kontra <kgergely@mcl.hu>
-" Version:	0.11
+" Version:	0.12
 " Description:
 " Marks and Jumps and Bracketing (template expanding) functions inspired by
 " the editor AlphaTK Later I found vim implementations by Stephen Riehm and
@@ -63,6 +63,7 @@ en
 " HISTORY:
 " 0.1	* Initial release
 " 0.11	* Many bugfixes
+" 0.12	* Bugfixes
 "}}}
 
 fu! Jumpfunc() "{{{ function, and mappings to it
@@ -94,8 +95,7 @@ fu! MarkMap(b, left, ... ) "{{{ and the related MarkMap{B} commands
   endw
   " INSERT MODE MAP: no buffer expand
   let r=substitute(substitute(right,'[¶·]','','g'),'«¡','«','g')
-  exe 'ima '. (a:b?'<buffer>':'') .
-    \ '¡'.a:left.'! '.r."<Esc>`[:cal search('«[^»]*»','W')<CR>"
+  exe 'ima '. (a:b?'<buffer>':'') . '¡'.a:left.'! '.r."<Esc>`[:cal search('«[^»]*»','W')<CR>"
 
   " VISUAL MAP: ignore insert-only mappings
   let r=substitute(right,'«¡[^»]*»','','g')
@@ -131,6 +131,7 @@ endf "}}}
 
 fu! s:Expand() "{{{
   let c=col('.')
+  let ia=(col('.')==strlen(getline('.')))?'a':'i'
   let l=strpart(getline('.'),0,c)
   let i=0
   wh i<c
@@ -140,7 +141,7 @@ fu! s:Expand() "{{{
 	exe 'norm '.(c-i-1).'h'
       en
       exe 'norm '.(c-i).'x'
-      exe 'norm a¡'.t."!"
+      exe 'norm '.ia.'¡'.t."!"
 
       retu s:DamnedEndOfLine()
     en
@@ -160,9 +161,9 @@ endf "}}}
 
 " Plugin-mappings {{{
 if !hasmapto('<Plug>MarkExpandI')
-  imap <unique> <C-Space> <Plug>MarkExpand
+  imap <unique> <C-Space> <Plug>MarkExpandI
 en
-ino <script> <Plug>MarkExpand <Esc>:cal <SID>Expand()<CR>
+ino <script> <Plug>MarkExpandI <Esc>:cal <SID>Expand()<CR>
 
 if !hasmapto('<Plug>MarkExpandV')
   vmap <unique> <C-Space> <Plug>MarkExpandV
@@ -175,7 +176,6 @@ aug MicroMarks "{{{
   au BufNewFile,BufRead * syn match IncSearch /«.\{-}»/ containedin=ALL
   au BufWritePre * if search('«[^»]*»','w') && confirm('File contain MicroMarks («» chars). Delete them?',"&Yes\n&No")==1|cal ClearMarks()|en
 aug END "}}}
-
 " common brackets and date {{{
 MarkMap ( <C-v>(«·»)«»
 MarkMap [ <C-v>[«·»]«»
@@ -187,4 +187,5 @@ MarkMap ' <C-v>'«·»<C-v>'«»
 MarkMap $ <C-v>$«·»<C-v>$«»
 MarkMap date ·<C-R>=strftime('%Y. %m. %d.')<CR>«»
 " }}}
-"vim:sw=2:sts=2:fdm=marker:cms=\"\ %s:fcl=all
+"vim:sw=2:sts=2:fdm=marker:fcl=all:cms=\"\ %s:
+
