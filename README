@@ -1,0 +1,23 @@
+This is a mirror of http://www.vim.org/scripts/script.php?script_id=243
+
+Template expander.
+Unique feature: one command for insert and visual-mode expansion.
+
+The MarkMap and MarkMapB commands allows you to make global and filetype-specific mappings. MarkMapB commands can be in your ftplugin dir in the appropiate file. The only weirdness is the typing of the command. Well, these weird characters should be configurable. (But I think they're at least readable, and look good)
+One example mapping (in my vim.vim)
+MarkMapB wh wh «»<CR>¶endw«¡»
+After typing wh, and pressing <C-Space> (you can change it) in insert mode, you will get
+wh |
+endw«»
+| symbols the cursor.
+So the «» characters are the cursor positions, and the furthers are the jump-points. There can be an explanation text between these 2 chars, so «explanation» is allowed.
+If you have a line
+echo 'Hello world'
+and you select it visually, press <C-Space> and type wh<CR>, you will get
+wh |
+  echo 'Hello world'
+endw
+So the ¶ sign is replaced by the visually selected text (adding an extra newline if needed).
+If you want to remove the trailing newline (if any) you can use the · symbol.
+Notice, that there is no mark after the endw.
+Marks, that begin with «¡ are not used in visual mappings.
